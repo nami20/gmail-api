@@ -17,6 +17,7 @@ import com.google.api.services.gmail.model.Message;
 import java.io.FileNotFoundException;
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import javax.mail.internet.MimeMessage;
@@ -73,7 +74,12 @@ public class GmailQuickStart {
                     .build();
 
             String user = "me";
-            googleService.sendMessage(service, "receiptent_address@gmail.com", "sender_adress@gmail.com", "Subject", "body text");
+//          googleService.sendMessage(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text");
+            String fileName = "static/images/download.png";
+            ClassLoader classLoader = new GmailQuickStart().getClass().getClassLoader();
+
+            File file = new File(classLoader.getResource(fileName).getFile());
+            googleService.sendMessageWithAttachment(service, "receiptent_address@gmail.com", "sender_address@gmail.com", "Subject", "body text", file);
         } catch (IOException | MessagingException e) {
             e.printStackTrace();
         }
