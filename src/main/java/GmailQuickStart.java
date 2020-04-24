@@ -27,6 +27,7 @@ import java.util.List;
 
 import service.GoogleService;
 import service.GoogleServiceImpl;
+import model.EmailObject;
 
 public class GmailQuickStart {
     private static final String APPLICATION_NAME = "fight club";
@@ -65,21 +66,19 @@ public class GmailQuickStart {
     }
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
-        // Build a new authorized API client service.
         try {
             GoogleService googleService = new GoogleServiceImpl();
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+            Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+                    getCredentials(HTTP_TRANSPORT))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
-
-            String user = "me";
-//          googleService.sendMessage(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text");
             String fileName = "static/images/download.png";
             ClassLoader classLoader = new GmailQuickStart().getClass().getClassLoader();
-
             File file = new File(classLoader.getResource(fileName).getFile());
-            googleService.sendMessageWithAttachment(service, "receiptent_address@gmail.com", "sender_address@gmail.com", "Subject", "body text", file);
+            EmailObject emailObjectWithAttacthment = new EmailObject(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text", file);
+            EmailObject emailObject = new EmailObject(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text");
+            googleService.sendMessage(emailObjectWithAttacthment);
         } catch (IOException | MessagingException e) {
             e.printStackTrace();
         }

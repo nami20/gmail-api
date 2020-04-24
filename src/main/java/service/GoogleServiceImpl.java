@@ -25,20 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
+import model.EmailObject;
+
 public final class GoogleServiceImpl implements GoogleService {
-
-    @Override
-    public boolean sendMessageWithAttachment(Gmail service, String recipientAddress, String fromAddress, String subject, String body, File file) throws MessagingException,
-            IOException {
-        Message message = createMessageWithEmail(
-                createEmailWithAttachment(recipientAddress, fromAddress, subject, body, file));
-
-        return service.users()
-                .messages()
-                .send(fromAddress, message)
-                .execute()
-                .getLabelIds().contains("SENT");
-    }
 
     public static MimeMessage createEmailWithAttachment(String to,
                                                         String from,
@@ -75,10 +64,21 @@ public final class GoogleServiceImpl implements GoogleService {
     }
 
     @Override
-    public boolean sendMessage(Gmail service, String recipientAddress, String fromAddress, String subject, String body) throws MessagingException,
+    public boolean sendMessage(EmailObject emailObject) throws MessagingException,
             IOException {
-        Message message = createMessageWithEmail(
-                createEmail(recipientAddress, fromAddress, subject, body));
+        Gmail service = emailObject.getService();
+        String recipientAddress = emailObject.getRecipientAddress();
+        String fromAddress = emailObject.getFromAddress();
+        String subject = emailObject.getSubject();
+        String body = emailObject.getBody();
+        File file = emailObject.getFile();
+        MimeMessage emailContent = null;
+        if(file == null) {
+            emailContent = createEmail(recipientAddress, fromAddress, subject, body);
+        } else {
+            emailContent = createEmailWithAttachment(recipientAddress, fromAddress, subject, body, file);
+        }
+        Message message = createMessageWithEmail(emailContent);
 
         return service.users()
                 .messages()
@@ -103,5 +103,4 @@ public final class GoogleServiceImpl implements GoogleService {
         return new Message()
                 .setRaw(Base64.encodeBase64URLSafeString(buffer.toByteArray()));
     }
-
 }
