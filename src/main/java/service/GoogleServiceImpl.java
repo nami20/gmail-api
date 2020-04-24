@@ -30,40 +30,6 @@ import model.EmailObject;
 
 public final class GoogleServiceImpl implements GoogleService {
 
-    public static MimeMessage createEmailWithAttachment(String to,
-                                                        String from,
-                                                        String subject,
-                                                        String bodyText,
-                                                        File file)
-            throws MessagingException, IOException {
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
-
-        MimeMessage email = new MimeMessage(session);
-
-        email.setFrom(new InternetAddress(from));
-        email.addRecipient(javax.mail.Message.RecipientType.TO,
-                new InternetAddress(to));
-        email.setSubject(subject);
-
-        MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        mimeBodyPart.setContent(bodyText, "text/plain");
-
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(mimeBodyPart);
-
-        mimeBodyPart = new MimeBodyPart();
-        DataSource source = new FileDataSource(file);
-
-        mimeBodyPart.setDataHandler(new DataHandler(source));
-        mimeBodyPart.setFileName(file.getName());
-
-        multipart.addBodyPart(mimeBodyPart);
-        email.setContent(multipart);
-
-        return email;
-    }
-
     @Override
     public boolean sendMessage(EmailObject emailObject) throws MessagingException,
             IOException {
@@ -74,12 +40,7 @@ public final class GoogleServiceImpl implements GoogleService {
         String body = emailObject.getBody();
         Optional<File> file = emailObject.getFile();
         MimeMessage emailContent = null;
-        if(file == null) {
-            emailContent = createEmail(recipientAddress, fromAddress, subject, body);
-        } else {
-            File fileAttactment = file.get();
-            emailContent = createEmailWithAttachment(recipientAddress, fromAddress, subject, body, fileAttactment);
-        }
+        emailContent = createEmail(recipientAddress, fromAddress, subject, body, file);
         Message message = createMessageWithEmail(emailContent);
 
         return service.users()
@@ -89,13 +50,34 @@ public final class GoogleServiceImpl implements GoogleService {
                 .getLabelIds().contains("SENT");
     }
 
-    private MimeMessage createEmail(String to, String from, String subject, String bodyText) throws MessagingException {
+    private MimeMessage createEmail(String to, String from, String subject, String bodyText, Optional<File> file) throws MessagingException {
         MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
         email.setFrom(new InternetAddress(from));
         email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
         email.setSubject(subject);
-        email.setText(bodyText);
+
+        if(file == null) {
+            email.setText(bodyText);
+        } else {
+            File fileAttachment = file.get();
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.setContent(bodyText, "text/plain");
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(mimeBodyPart);
+
+            mimeBodyPart = new MimeBodyPart();
+            DataSource source = new FileDataSource(fileAttachment);
+
+            mimeBodyPart.setDataHandler(new DataHandler(source));
+            mimeBodyPart.setFileName(fileAttachment.getName());
+
+            multipart.addBodyPart(mimeBodyPart);
+            email.setContent(multipart);
+        }
+
         return email;
+
     }
 
     private Message createMessageWithEmail(MimeMessage emailContent) throws MessagingException, IOException {
