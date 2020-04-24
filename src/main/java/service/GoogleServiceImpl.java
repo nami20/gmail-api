@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Optional;
 
 import model.EmailObject;
 
@@ -71,12 +72,13 @@ public final class GoogleServiceImpl implements GoogleService {
         String fromAddress = emailObject.getFromAddress();
         String subject = emailObject.getSubject();
         String body = emailObject.getBody();
-        File file = emailObject.getFile();
+        Optional<File> file = emailObject.getFile();
         MimeMessage emailContent = null;
         if(file == null) {
             emailContent = createEmail(recipientAddress, fromAddress, subject, body);
         } else {
-            emailContent = createEmailWithAttachment(recipientAddress, fromAddress, subject, body, file);
+            File fileAttactment = file.get();
+            emailContent = createEmailWithAttachment(recipientAddress, fromAddress, subject, body, fileAttactment);
         }
         Message message = createMessageWithEmail(emailContent);
 

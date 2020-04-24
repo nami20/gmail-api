@@ -28,6 +28,7 @@ import java.util.List;
 import service.GoogleService;
 import service.GoogleServiceImpl;
 import model.EmailObject;
+import java.util.Optional;
 
 public class GmailQuickStart {
     private static final String APPLICATION_NAME = "fight club";
@@ -76,8 +77,9 @@ public class GmailQuickStart {
             String fileName = "static/images/download.png";
             ClassLoader classLoader = new GmailQuickStart().getClass().getClassLoader();
             File file = new File(classLoader.getResource(fileName).getFile());
-            EmailObject emailObjectWithAttacthment = new EmailObject(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text", file);
-            EmailObject emailObject = new EmailObject(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text");
+            EmailObject emailObjectWithAttacthment = new EmailObject(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text", Optional.ofNullable(file));
+            EmailObject emailObject = new EmailObject(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text", null);
+            googleService.sendMessage(emailObject);
             googleService.sendMessage(emailObjectWithAttacthment);
         } catch (IOException | MessagingException e) {
             e.printStackTrace();

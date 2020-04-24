@@ -2,6 +2,7 @@ package model;
 
 import com.google.api.services.gmail.Gmail;
 import java.io.File;
+import java.util.Optional;
 
 public class EmailObject {
     public Gmail service;
@@ -9,25 +10,18 @@ public class EmailObject {
     public String fromAddress;
     public String subject;
     public String body;
-    public File file;
+    public Optional<File> file;
 
     public EmailObject(Gmail service, String recipientAddress,
-                       String fromAddress, String subject, String body, File file) {
+                       String fromAddress, String subject, String body, Optional<File> file) {
         this.service = service;
         this.recipientAddress = recipientAddress;
         this.fromAddress = fromAddress;
         this.subject = subject;
         this.body = body;
-        this.file = file;
-    }
-
-    public EmailObject(Gmail service, String recipientAddress,
-                       String fromAddress, String subject, String body) {
-        this.service = service;
-        this.recipientAddress = recipientAddress;
-        this.fromAddress = fromAddress;
-        this.subject = subject;
-        this.body = body;
+        if(file != null) {
+            this.file = file;
+        }
     }
 
     public Gmail getService() {
@@ -50,7 +44,7 @@ public class EmailObject {
         return body;
     }
 
-    public File getFile() {
+    public Optional<File> getFile() {
         return file;
     }
 
@@ -74,7 +68,7 @@ public class EmailObject {
         this.body = body;
     }
 
-    public void setFile(File file) {
+    public void setFile(Optional<File> file) {
         this.file = file;
     }
 }
