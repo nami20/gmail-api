@@ -1,8 +1,5 @@
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -13,9 +10,11 @@ import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Label;
 import com.google.api.services.gmail.model.ListLabelsResponse;
 import com.google.api.services.gmail.model.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.FileNotFoundException;
 import javax.mail.MessagingException;
+import java.lang.NullPointerException;
 import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
@@ -30,41 +29,22 @@ import service.GoogleServiceImpl;
 import model.EmailObject;
 import java.util.Optional;
 
+
 public class GmailQuickStart {
+
     private static final String APPLICATION_NAME = "fight club";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
-    /**
-     * Global instance of the scopes required by this quickstart.
-     * If modifying these scopes, delete your previously saved tokens/ folder.
-     */
-    private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_LABELS);
-    private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-
-    /**
-     * Creates an authorized Credential object.
-     * @param HTTP_TRANSPORT The network HTTP Transport.
-     * @return An authorized Credential object.
-     * @throws IOException If the credentials.json file cannot be found.
-     */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        // Load client secrets.
-        InputStream in = GmailQuickStart.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
-        }
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setAccessType("offline")
-                .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        return new GoogleCredential.Builder()
+                .setTransport(HTTP_TRANSPORT)
+                .setJsonFactory(JSON_FACTORY)
+                .setClientSecrets(client_id, client_secret)
+                .build()
+                .setAccessToken(access_token)
+                .setRefreshToken(refresh_token);
     }
+
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
         try {
@@ -81,7 +61,7 @@ public class GmailQuickStart {
             EmailObject emailObject = new EmailObject(service, "tnotna01@gmail.com", "teenu.nota@technogramsolutions.com", "Subject", "body text", null);
             googleService.sendMessage(emailObject);
             googleService.sendMessage(emailObjectWithAttacthment);
-        } catch (IOException | MessagingException e) {
+        } catch (NullPointerException | IOException | MessagingException e) {
             e.printStackTrace();
         }
     }
